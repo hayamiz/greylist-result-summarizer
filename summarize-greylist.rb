@@ -72,14 +72,12 @@ class ClassifierRunner
   end
 end
 
-$c = 0
-
 def sort_senders_by_dest(logfile)
   mailaddr_senders = Hash.new{Array.new}
   logfile.each_line do |line|
     next unless line =~ /^\w+ \d+ \d{2}:\d{2}:\d{2} \w+ milter-greylist:/
     
-    next unless $POSTMATCH =~ /addr (\[[\.0-9]+\]|\S+)\[([\.0-9]+)\] from <?([^>]+)>? to <?([^>]+)>?/
+    next unless $POSTMATCH =~ /addr (\[[\.0-9]+\]|\S+)\[([\.0-9]+)\] from <?([^> ]+)>? to <?([^> ]+)>?/
     
     host = $~[1]
     ipaddr = $~[2]
