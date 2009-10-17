@@ -88,8 +88,6 @@ def sort_senders_by_dest(logfile)
 
     sender = $sender.new(to, from, host, ipaddr)
     mailaddr_senders[to] <<= sender
-    
-    $c += 1
   end
   mailaddr_senders
 end
