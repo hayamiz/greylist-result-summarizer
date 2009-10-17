@@ -15,7 +15,7 @@ class MessageClassifier
 end
 
 class NoHostnameMessageClassifier < MessageClassifier
-  label "No hostname (cannot resolved by DNS)"
+  label "No hostname (DNS resolution failure)"
 
   # return true if 'sender' is classified into this class
   def self.classify(sender)
