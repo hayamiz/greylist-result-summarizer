@@ -20,7 +20,27 @@ class NoHostnameMessageClassifier < MessageClassifier
 
   # return true if 'sender' is classified into this class
   def self.classify(sender)
-    sender.host =~ /^[\.0-9]+$/
+    sender.host =~ /^[0-9]{1,3}(\.[0-9]{1,3}){3}$/
+  end
+end
+
+class S25RMessageClassifier < MessageClassifier
+  label "S25R(Selective SMTP Rejection)"
+
+  def self.classify(sender)
+    case sender.host
+    when "unknown",
+      /\A\[.+\]\z/,
+      /\A[^.]*\d[^\d.]+\d.*\./,
+      /\A[^.]*\d{5}/,
+      /\A(?:[^.]+\.)?\d[^.]*\.[^.]+\..+\.[a-z]/i,
+      /\A[^.]*\d\.[^.]*\d-\d/,
+      /\A[^.]*\d\.[^.]*\d\.[^.]+\..+\./,
+      /\A(?:dhcp|dialup|ppp|[achrsvx]?dsl)[^.]*\d/i
+      true
+    else
+      false
+    end
   end
 end
 
