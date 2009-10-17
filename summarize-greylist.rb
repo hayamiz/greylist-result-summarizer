@@ -2,9 +2,10 @@
 
 require 'English'
 
-classes = ["NoHostname"]
+classes = ["NoHostname","S25R"]
 
 $sender = Struct.new("Sender", :to, :from, :host, :ipaddr)
+$counted_sender = Struct.new("CountedSender", :to, :host, :ipaddr, :froms, :count)
 $classified_result = Struct.new("ClassifiedResult", :classifier, :senders)
 
 class MessageClassifier
@@ -92,6 +93,26 @@ def sort_senders_by_dest(logfile)
   mailaddr_senders
 end
 
+def count_senders(senders)
+  counted_senders = Hash.new
+  senders.each do |sender|
+    counted_sender = counted_senders[sender.host]
+    unless counted_sender
+      counted_sender = $counted_sender.new(sender.to, sender.host,
+                                           sender.ipaddr, [], 0)
+      counted_senders[sender.host] = counted_sender
+    end
+    
+    counted_sender.count += 1
+    counted_sender.froms << sender.from
+  end
+
+  counted_senders.each do |host,sender|
+    sender.froms = sender.froms.sort.uniq
+  end
+  counted_senders.values.sort{|s1, s2| s2.count <=> s1.count}
+end
+
 if __FILE__ == $0
   sorted_senders = sort_senders_by_dest(ARGF)
   sorted_classified_senders = sorted_senders.map do |dest, senders|
@@ -106,12 +127,12 @@ if __FILE__ == $0
     
     classified_results.each do |result|
       klass = result.classifier
-      senders = result.senders
+      senders = count_senders(result.senders)
 
       puts "  #{klass.label}:"
       
       senders.each do |sender|
-        puts "    #{sender.from} (#{sender.host})"
+        puts "    [#{sender.count}] #{sender.host} (#{sender.froms.join(", ")})"
       end
     end
   end
